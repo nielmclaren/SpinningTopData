@@ -3,8 +3,6 @@ import processing.serial.*;
 
 Serial serial;
 String buffer;
-float accelX;
-float accelY;
 float accelZ;
 
 ArrayList<Reading> accelZReadings;
@@ -18,8 +16,6 @@ void setup() {
   serial = new Serial(this, Serial.list()[1], 9600);
   buffer = "";
 
-  accelX = 0;
-  accelY = 0;
   accelZ = 0;
 
   accelZReadings = new ArrayList<Reading>();
@@ -47,22 +43,14 @@ void readData(Serial serial) {
   }
 }
 
-void readAccel(String values) {
-  String[] parts = values.split(",");
-  if (parts.length < 3) {
-    println("Got bad value: " + values);
-    return;
-  }
-
+void readAccel(String value) {
   boolean isError;
   try {
-    accelX = Float.parseFloat(parts[0]);
-    accelY = Float.parseFloat(parts[1]);
-    accelZ = Float.parseFloat(parts[2]);
+    accelZ = Float.parseFloat(value);
     isError = false;
   } 
   catch (Exception e) {
-    println("Failed to parse: " + values);
+    println("Failed to parse: " + value);
     isError = true;
   }
 
@@ -83,17 +71,11 @@ void drawValues() {
   strokeWeight(1);
 
   rectMode(CORNERS);
-  rect(0 * width/3, height/4, 1 * width/3, height/4 + map(accelX, -maxRadiansPerSecond, maxRadiansPerSecond, height/4, -height/4));
-  rect(1 * width/3, height/4, 2 * width/3, height/4 + map(accelY, -maxRadiansPerSecond, maxRadiansPerSecond, height/4, -height/4));
   rect(2 * width/3, height/4, 3 * width/3, height/4 + map(accelZ, -maxRadiansPerSecond, maxRadiansPerSecond, height/4, -height/4));
 
-  String accelXText = accelX + " m/s^2";
-  String accelYText = accelY + " m/s^2";
   String accelZText = accelZ + " m/s^2";
 
   fill(128);
-  text(accelXText, 1 * width/6 - textWidth(accelXText), height/4);
-  text(accelYText, 3 * width/6 - textWidth(accelYText), height/4);
   text(accelZText, 5 * width/6 - textWidth(accelZText), height/4);
 }
 

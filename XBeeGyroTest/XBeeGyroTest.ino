@@ -64,10 +64,6 @@ void loop() {
   Serial.println("rad/s ");
 */
   // Send results to XBee
-  Serial1.print(event.gyro.x);
-  Serial1.print(",");
-  Serial1.print(event.gyro.y);
-  Serial1.print(",");
   Serial1.print(event.gyro.z);
   Serial1.print(";");
   
