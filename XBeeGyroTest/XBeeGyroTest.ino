@@ -17,6 +17,8 @@
   #include <avr/power.h>
 #endif
 
+#define ID 0
+
 /* Assign a unique ID to this sensor at the same time */
 Adafruit_FXAS21002C gyro = Adafruit_FXAS21002C(0x0021002C);
 
@@ -76,6 +78,8 @@ void loop() {
   Serial.println("rad/s ");
 */
   // Send results to XBee
+  Serial1.print(ID);
+  Serial1.print(":");
   Serial1.print(event.gyro.z);
   Serial1.print(";");
 
@@ -87,7 +91,7 @@ void loop() {
 
   strip.show();
   
-  delay(10);
+  delay(50);
 }
 
 void setStripColor(uint32_t c) {
