@@ -22,7 +22,16 @@
 /* Assign a unique ID to this sensor at the same time */
 Adafruit_FXAS21002C gyro = Adafruit_FXAS21002C(0x0021002C);
 
-Adafruit_NeoPixel strip = Adafruit_NeoPixel(16, 23, NEO_GRBW + NEO_KHZ800);
+Adafruit_NeoPixel strip;
+
+long gyroTotal = 0;
+long prevGyroTotal = 0;
+
+int rgbw0 = strip.Color(64, 12, 42, 0);
+int rgbw1 = strip.Color(18, 7, 39, 0);
+int rgb0 = strip.Color(64, 12, 42);
+int rgb1 = strip.Color(18, 7, 39);
+int black = strip.Color(0, 0, 0);
 
 void displaySensorDetails(void)
 {
@@ -43,6 +52,12 @@ void displaySensorDetails(void)
 void setup(void) {
   // sanity check delay - allows reprogramming if accidently blowing power w/leds
   delay(2000);
+
+  if (ID == 2) {
+    strip = Adafruit_NeoPixel(16, 23, NEO_GRBW + NEO_KHZ800);
+  } else {
+    strip = Adafruit_NeoPixel(27, 23, NEO_GRB + NEO_KHZ800);
+  }
   
   Serial.begin(9600);
   Serial.println("Gyroscope Test");
@@ -82,11 +97,29 @@ void loop() {
   Serial1.print(":");
   Serial1.print(event.gyro.z);
   Serial1.print(";");
-
-  if (event.gyro.z < 1) {
-    setStripColor(strip.Color(64, 12, 42, 0));
+  
+  if (ID == 2) {
+    if (event.gyro.z < 1) {
+      setStripColor(rgbw0);
+    } else {
+      setStripColor(rgbw1);
+    }
   } else {
-    setStripColor(strip.Color(18, 7, 39, 0));
+    gyroTotal += abs(event.gyro.z);
+    
+    int thresh = 100;
+    if (gyroTotal > 2 * thresh) {
+      if (prevGyroTotal <= 2 * thresh) {
+        setStripColor(rgb1);
+        gyroTotal = 0;
+      }
+    } else if (gyroTotal > thresh) {
+      if (prevGyroTotal <= thresh) {
+        setStripColor(rgb0);
+      }
+    }
+
+    prevGyroTotal = gyroTotal;
   }
 
   strip.show();
