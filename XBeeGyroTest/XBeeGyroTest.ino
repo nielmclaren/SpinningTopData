@@ -12,9 +12,15 @@
 #include <Wire.h>
 #include <Adafruit_Sensor.h>
 #include <Adafruit_FXAS21002C.h>
+#include <Adafruit_NeoPixel.h>
+#ifdef __AVR__
+  #include <avr/power.h>
+#endif
 
 /* Assign a unique ID to this sensor at the same time */
 Adafruit_FXAS21002C gyro = Adafruit_FXAS21002C(0x0021002C);
+
+Adafruit_NeoPixel strip = Adafruit_NeoPixel(16, 23, NEO_GRBW + NEO_KHZ800);
 
 void displaySensorDetails(void)
 {
@@ -33,6 +39,9 @@ void displaySensorDetails(void)
 }
 
 void setup(void) {
+  // sanity check delay - allows reprogramming if accidently blowing power w/leds
+  delay(2000);
+  
   Serial.begin(9600);
   Serial.println("Gyroscope Test");
   Serial.println("");
@@ -48,6 +57,9 @@ void setup(void) {
   /* Display some basic information on this sensor */
   displaySensorDetails();
 
+  strip.begin();
+  strip.show();
+  
   // Begin HW serial to XBee
   Serial1.begin(9600);
 }
@@ -66,6 +78,20 @@ void loop() {
   // Send results to XBee
   Serial1.print(event.gyro.z);
   Serial1.print(";");
+
+  if (event.gyro.z < 1) {
+    setStripColor(strip.Color(64, 12, 42, 0));
+  } else {
+    setStripColor(strip.Color(18, 7, 39, 0));
+  }
+
+  strip.show();
   
   delay(10);
+}
+
+void setStripColor(uint32_t c) {
+  for(int i = 0; i < strip.numPixels(); i++) {
+    strip.setPixelColor(i, c);
+  }
 }
